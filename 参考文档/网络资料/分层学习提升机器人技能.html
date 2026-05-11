@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="zh-CN">
+ <head> 
+  <meta charset="utf-8"> 
+  <link rel="canonical" href="https://blog.csdn.net/m0_54190358/article/details/122611720"> 
+  <meta http-equiv="content-type" content="text/html; charset=utf-8"> 
+  <meta name="renderer" content="webkit"> 
+  <meta name="force-rendering" content="webkit"> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+  <meta name="report" content="{&quot;pid&quot;: &quot;blog&quot;, &quot;spm&quot;:&quot;1001.2101&quot;}"> 
+  <meta name="referrer" content="always"> 
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <link rel="alternate" media="handheld" href="#">  
+  <meta name="applicable-device" content="pc"> 
+  <link href="https://g.csdnimg.cn/static/logo/favicon32.ico" rel="shortcut icon" type="image/x-icon"> 
+  <title>分层学习提升机器人技能-CSDN博客</title>  
+  <meta name="keywords" content="pllr"> 
+  <meta name="csdn-baidu-search" content="{&quot;autorun&quot;:true,&quot;install&quot;:true,&quot;keyword&quot;:&quot;pllr&quot;}"> 
+  <meta name="description" content="文章浏览阅读400次。Part 42014年UT采用了广泛的分层设计学习机器人技能的学习方法，如站立、行走和踢腿。这包括顺序分层学习，其中新学习的层在学习后续层之前被冻结，以及重叠层，其中先前学习的层的部分作为当前学习层的一部分被重新优化。在分层学习过程中，总共优化了500多个参数。所有参数均使用协方差矩阵自适应进化策略（CMA-ES）算法（Hansen 2009）进行优化，该算法此前已成功应用于RoboCup 3D仿真领域的学习技能（Urieli等人，2011年）在优化19种行为的过程中，总共进行了705000次学_pllr"> 
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/css/detail_enter-c282253ab5.min.css">  
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/themesSkin/skin-1024/skin-1024-ecd36efea2.min.css">    
+  <meta name="toolbar" content="{&quot;type&quot;:&quot;0&quot;,&quot;fixModel&quot;:&quot;1&quot;}">   
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/public/sandalstrap/1.4/css/sandalstrap.min.css"> 
+  <style>
+        .MathJax, .MathJax_Message, .MathJax_Preview{
+            display: none
+        }
+    </style>      
+ 	<style>
+	main div.blog-content-box pre {
+		max-height: 100%;
+		overflow-y: hidden;
+	}
+	</style>
+ </head>  
+ <body class="nodata  " style=""> 
+  <div id="toolbarBox" style="min-height: 48px;"></div>    
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/pc/css/blog_code-01256533b5.min.css"> 
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/chart-3456820cac.css"> 
+  <link rel="stylesheet" href="https://g.csdnimg.cn/lib/swiper/6.0.4/css/swiper.css">   
+  <div class="main_father clearfix d-flex justify-content-center mainfather-concision" style="height:100%;"> 
+   <div class="container clearfix container-concision" id="mainBox">  
+    <main>  
+     <div class="blog-content-box"> 
+      <div class="article-header-box" id="article-header-box"> 
+       <div class="article-header"> 
+        <div class="article-title-box"> 
+         <h1 class="title-article" id="articleContentId">UT2014补充学习笔记</h1> 
+        </div>  
+       </div> 
+      </div> 
+      <div id="blogHuaweiyunAdvert" class="active-padding"></div> 
+      <article class="baidu_pl"> 
+       <div id="article_content" class="article_content clearfix"> 
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css"> 
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-10bf609291.css"> 
+        <div id="content_views" class="htmledit_views atom-one-dark"> 
+         <h3 style="margin-left:0px;text-align:left;"><strong>Part 4</strong></h3> 
+         <p style="margin-left:0;text-align:justify;">2014年UT采用了广泛的分层设计学习机器人技能的学习方法，如站立、行走和踢腿。这包括顺序分层学习，其中新学习的层在学习后续层之前被冻结，以及重叠层，其中先前学习的层的部分作为当前学习层的一部分被重新优化。</p> 
+         <p style="margin-left:0;text-align:justify;">在分层学习过程中，总共优化了500多个参数。所有参数均使用协方差矩阵自适应进化策略（CMA-ES）算法（Hansen 2009）进行优化，该算法此前已成功应用于RoboCup 3D仿真领域的学习技能（Urieli等人，2011年）</p> 
+         <p style="margin-left:0;text-align:justify;">在优化19种行为的过程中，总共进行了705000次学习试验。优化是在Condor（Thain、Tannenbaum和Livny 2005）分布式计算集群上执行的，该集群允许并行运行许多作业。运行完整的优化过程大约需要5天，我们计算出，假设计算集群上没有作业排队延迟，理论上可以在49小时内完成，并利用优化过程中所有可能的并行性。请注意，当在一台计算机上按顺序执行相同数量的计算时，将需要大约561天或略多于1.5年的时间才能完成。</p> 
+         <p style="margin-left:0;text-align:justify;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 以下小节记录了团队使用的方法中重叠的学习部分。由于空间限制，省略了一些学习行为层的全部细节，但是图3显示了学习过程中所有不同层次的学习行为如何结合在一起的示意图，图4提供了每个行为的简要说明。</p> 
+         <p style="margin-left:0;text-align:justify;"><img alt="" height="446" src="https://i-blog.csdnimg.cn/blog_migrate/70b70c82196fd94855590df19e34878b.png" width="1108"></p> 
+         <p style="margin-left:0;text-align:justify;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 不同的分层学习行为，括号中显示了针对每个行为优化的参数数量。黑色实心箭头表示从先前学习的层行为传递的学习和冻结参数的数量，红色虚线箭头表示从一个行为传递和重新学习的重叠参数的数量，蓝色虚线箭头显示了作为种子值传递的参数值的数量，这些种子值将用于下一层学习的新参数中。重叠层的颜色为橙色的CILB层、绿色的PCLL层和黄色的PLLR层。图4给出了各层的描述</p> 
+         <p style="margin-left:0;text-align:justify;">Getup Front行为：带漫游的Getup Front基本体。</p> 
+         <p style="margin-left:0;text-align:justify;">Getup Back行为：带漫游的Getup Back原语。</p> 
+         <p style="margin-left:0;text-align:justify;">Getup Front Primitive：躺在前面时站起来。</p> 
+         <p style="margin-left:0;text-align:justify;">Getup Back Primitive：仰卧时站起来。</p> 
+         <p style="margin-left:0;text-align:justify;">开球行为：开球时两名球员的行为得分，其中一名球员在其他球员开球前触球。</p> 
+         <p style="margin-left:0;text-align:justify;">开球踢腿原语：单代理踢腿行为，在静止球的开球中得分。</p> 
+         <p style="margin-left:0;text-align:justify;">开球触碰原语：单代理行为，代理轻轻触碰球，导致小球运动。</p> 
+         <p style="margin-left:0;text-align:justify;">快速踢腿行为：快速踢腿和步行。</p> 
+         <p style="margin-left:0;text-align:justify;">快速踢腿：快速和短踢腿。</p> 
+         <p style="margin-left:0;text-align:justify;">高踢腿行为：高踢腿和步行。</p> 
+         <p style="margin-left:0;text-align:justify;">踢高：踢过对手的踢。</p> 
+         <p style="margin-left:0;text-align:justify;">低踢腿行为：低踢腿基本动作和步行。</p> 
+         <p style="margin-left:0;text-align:justify;">低踢：踢低于球门高度的球。</p> 
+         <p style="margin-left:0;text-align:justify;">长踢腿行为：长踢腿和步行。</p> 
+         <p style="margin-left:0;text-align:justify;">长踢腿：长踢腿。</p> 
+         <p style="margin-left:0;text-align:justify;">步行接近（Walk approach）：步行参数，用于在踢球前在球后的精确位置停车。</p> 
+         <p style="margin-left:0;text-align:justify;">漫游GoToTarget：常规默认漫游参数。</p> 
+         <p style="margin-left:0;text-align:justify;">行走位置到Ribble：运球行走参数。</p> 
+         <p style="margin-left:0;text-align:justify;">步行冲刺：快速向前行走的步行参数</p> 
+         <p style="margin-left:0;text-align:justify;">图4：图3中分层学习行为的描述。</p> 
+         <p style="margin-left:0;text-align:justify;"><span style="color:#404040;"><em>先前学习的层细化（PLLR）：在学习和冻结一个层后，然后学习后续层，然后解冻和重新学习先前学习的部分或全部层，以便更好地处理现在完全或部分冻结的新学习层。我们认为在新的条件下重新优化先前冻结的层作为新的习得层行为，行为之间的“缝合”是先前学习层的未冻结部分。当需要先学习子任务，然后才能学习下一个后续任务层时，此场景非常有用，但随后改进或重新学习原始学习的任务层，以便更好地使用新学习的任务层会带来好处。示例：教机器人走路。首先，机器人需要学会如何站起来，这样，如果它摔倒了，它就可以重新站起来，继续尝试行走。最终，机器人学会了走路，以至于在训练中几乎不会摔倒。后来，当机器人最终摔倒时，发现如果机器人站起来后立即尝试行走，机器人学习到的行走动作不稳定。机器人需要重新学习站立行为层，以便在完成此操作后，它处于稳定位置，开始使用学习的行走行为层行走</em></span></p> 
+         <h3 style="margin-left:0px;text-align:justify;"><span style="color:#404040;"><em>4.1 </em></span><span style="color:#404040;"><em>用PLLR实现起身和行走</em></span></h3> 
+         <p style="margin-left:0;text-align:justify;">UT团队采用全方位行走引擎，使用双倒立摆模型控制行走。步行引擎有许多参数需要优化，以创建稳定和快速的步行，包括步长和频率以及重心偏移。我们在以前的工作中发现步行引擎只有一组参数限制性能，而不是将步行引擎分成不同的子任务，每个子任务学习一组步行引擎参数（MacAlpine et al.2012a）</p> 
+         <p style="margin-left:0;text-align:justify;">在优化行走引擎的参数之前，将优化设置行为，以便在机器人摔倒时能够重新站立并开始行走。在步行优化过程中，为了更快地学习，必须要有站起来的行为，因为如果机器人摔倒后不能站起来，那么一旦机器人摔倒，步行优化任务就必须立即终止。起床有两种行为：正面朝下站立的“站起来”基本体和正面朝上站立的“站起来”基本体。通过一系列不同的关节角度对每个站立行为进行参数化，并根据机器人能够站立的速度进行评估（MacAlpine et al.2013）。</p> 
+         <p style="margin-left:0;text-align:justify;">在学习Walk GoToTarget和Walk Sprint Walk engine参数集之后，我们通过学习GetUp Front行为和GetUp Back行为来重新优化装备。GetUp Front行为和GetUp Back行为是重叠的分层学习行为，因为它们分别包含与先前学习的GetUp Front原语和GetUp Back原语行为相同的参数。通过与设置基本体相同的优化，从基本体行为值重新优化设置行为参数，但在完成设置行为后，机器人会被要求向不同方向行走，如果在尝试行走时摔倒，则会受到惩罚.</p> 
+         <p style="margin-left:0;text-align:justify;">不同于单独学习的装备原语，装备行为是从站立到几乎立即行走的稳定过渡。有人可能会认为，由于行走参数优化任务中使用了设置原语，因此学习到的行走参数集将从设置中稳定过渡，然而，情况并非总是如此，因为在学习行走过程中，行走变得稳定，以至于在优化行走参数设置的最后，机器人几乎不会摔倒，因此很少使用装备原语。学习设置行为是先前学习的层优化（PLLR）的一个示例.</p> 
+         <h3 style="margin-left:0px;text-align:justify;">4.2 用CILB实现踢球</h3> 
+         <p style="margin-left:0;text-align:justify;"><span style="color:#404040;"><em>组合独立学习行为（CILB）：在同一层中独立学习两个或多个行为，然后通过重新学习行为参数的某个子集或行为之间的“接缝”，在下一层中组合为联合行为。当子任务行为过于复杂和/或在学习过程中可能相互干扰，因此必须独立学习，但最终需要为组合任务协同工作时，此场景最为理想。示例：一个篮球机器人，必须能够将球运过球场并射入篮筐。运球和投篮的任务太复杂，无法一起学习，但在独立学习任务后，可以通过重新优化控制球场上机器人停止运球的点和机器人投篮的角度的参数来组合任务。</em></span></p> 
+         <p style="margin-left:0;text-align:justify;">2014年UT学习了四种原始踢腿行为（长踢腿原语、低踢腿原语、高踢腿原语和快踢腿原语。每个踢腿原语或踢腿动作都是通过将机器人放置在球后的固定位置，并使其优化一组固定关键运动帧的关节角度来学习的。请注意，学习踢腿的初始尝试是直接通过步行，而不是通过步行独立学习踢腿基本动作，由于机器人靠近踢球时行走停止位置的变化，被证明过于困难。</p> 
+         <p style="margin-left:0;text-align:justify;">当机器人站在球的后面时，踢的原始行为非常有效，但当机器人试图走到球前踢它时，它们很难执行。造成此困难的一个原因是，当机器人接近球并使用Walk Approach ToKick Walk参数踢它时，设置与球的精确偏移位置，该偏移位置是踢原语优化后使用的，与机器人向球走去后停止的位置不匹配。为了让机器人从步行过渡到踢腿，对所有踢腿的全踢腿行为进行了优化（长踢腿行为、低踢腿行为、高踢腿行为、快踢腿行为）。通过让机器人走向球并尝试从不同的起始位置踢它（与优化踢基本行为时让机器人仅仅站在球后面不同），可以学习每个全踢行为。</p> 
+         <p style="margin-left:0;text-align:justify;">全踢行为是重叠的分层学习行为，因为它们正在重新优化先前的学习参数。在快速踢腿行为的情况下，仅对球的x和y踢腿基本体偏移位置参数进行重新优化，该参数是要执行踢腿的步行到达的目标位置。快速踢腿的速度足够快，在从步行过渡到快速踢腿后，它几乎会立即踢到球，因此只需要在靠近球的正确位置即可。图5显示了学习快速踢腿行为的重叠分层学习范例的比较。上述重叠分层学习法（先独立学习步行法和踢腿法，然后学习两个位置参数）比顺序分层学习法（冻结进近后学习所有踢腿参数）效果更好，以及并行分层学习方法，其中方法和井涌参数同时学习。</p> 
+         <p style="margin-left:0;text-align:justify;"><img alt="" height="439" src="https://i-blog.csdnimg.cn/blog_migrate/4e4a6751ae131b4f088c983b1ce2f67f.png" width="610"></p> 
+         <p style="margin-left:0;text-align:justify;">图5：优化快速踢腿行为时，不同分层学习范式在几代CMA-ES中的性能。结果是在所有测试中取平均值。</p> 
+         <p style="margin-left:0;text-align:justify;">对于其他完整踢腿行为，来自其各自踢腿基本行为的所有井涌参数都将重新优化。与快速踢球不同，在停止行走和踢球之间至少有一秒的延迟，在此期间，机器人很容易变得不稳定并摔倒。通过打开所有踢腿参数，机器人可以自由学习踢腿动作，从而在行走后停止和接触球之间保持稳定。通过将踢腿行为与踢腿接近步行行为相结合来学习踢腿行为都是结合独立学习行为（CILB）的示例。</p> 
+         <h3 style="margin-left:0px;text-align:justify;"><span style="color:#404040;"><em>4.3</em></span><span style="color:#404040;"><em>同时使用CILB和PCLL开球</em></span></h3> 
+         <p style="margin-left:0;text-align:justify;"><span style="color:#404040;"><em>部分并发分层学习（PCLL）：在使用新参数学习后续层时，只保留先前学习层的部分（但不是全部）行为参数。先前学习的层的参数中打开的部分是层之间的“接缝”。如果完全并发学习不必要地增加了搜索空间的维数，从而阻碍了学习，并且完全冻结前一层会降低各层协同工作的潜在行为，则部分并发学习是有益的。示例：教一个机器人捡起一个物体并将其交给另一个机器人。首先，机器人被教导捡起一个物体，然后伸出手臂并释放该物体。然后，第二个机器人被教导伸出手臂抓住第一个机器人释放的物体。在第二个机器人学习抓取物体的过程中，第一个机器人先前学习的移交物体的行为部分保持打开状态，以便第一个机器人可以将其物体的释放点调整到第二个机器人可以确定到达的位置。</em></span></p> 
+         <p style="margin-left:0;text-align:justify;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 对于开球，机器人可以在开球前将自己移动到球旁边的起始位置，因此不需要担心走向球。但是，开球时不允许直接得分，因为另一个机器人必须在球进入对手球门前先触球。为了在开球时得分，我们执行一个多智能体任务，其中一个机器人在另一个机器人开球之前先触球。</p> 
+         <p style="margin-left:0;text-align:justify;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 为开球得分而优化的第一个行为是开球基本动作，其中机器人从场地中间踢球。只要球越过球门高度以下的球门线，机器人就可以将球踢得尽可能高，尽可能远，从而获得奖励。平行触球是机器人学习到的另一种平行触球行为。在这里，机器人轻触球会得到奖励，在确保机器人接触到球后，球会尽可能少地移动。最后，学习称为开球行为的重叠分层行为，该行为根据开球基本体和开球-触球基本体行为重新优化球的x、y和角度偏移位置。同时重新优化这些定位参数非常重要，这样机器人就不会意外地相互碰撞，并且在第一个代理接触到球后，踢球机器人处于踢球的良好位置。学习开球行为是结合独立学习行为（CILB）的另一个例子。</p> 
+         <p style="margin-left:0;text-align:justify;">除了为开球行为重新优化两个机器人的定位参数外，还优化了确定第一个机器人触球时间的新参数。此同步计时参数是必需的，以便机器人彼此同步，并且在第一个机器人触球之前，踢球机器人不会意外尝试踢球。由于一个新参数与先前学习的参数子集一起被优化，学习开球行为也是部分并发分层学习（PCLL）的一个例子。</p> 
+         <p style="margin-left:0;text-align:justify;">关于开球的更多信息，包括如何通过观察了解开球种子，请参见（Depinet、MacAlpine和Stone 2015）</p> 
+         <h3 style="margin-left:0px;text-align:left;"><strong>Part 5</strong></h3> 
+         <p style="margin-left:0;text-align:justify;">2014年球队在比赛中的改进和成功的一个关键组成部分是新的重叠分层学习方法来学习球队的低层行为。</p> 
+         <p style="margin-left:0;text-align:justify;">当打开和关闭踢球和踢球组件通过重叠的分层学习方法学习。此外，为了验证我们的重叠分层学习方法的通用性，我们提供了分离我们完整的重叠分层学习方法应用于不同机器人模型的性能的数据。</p> 
+         <h3 style="margin-left:0px;text-align:justify;">5.1整体团队绩效</h3> 
+         <p style="margin-left:0;text-align:justify;">表1显示了2014年UT队完成的所有比赛对手的平均进球差。</p> 
+         <p style="margin-left:0;text-align:justify;">这说明团队重叠分层学习方式在戏剧性地提高团队绩效方面比上年有了明显的成效。</p> 
+         <p style="margin-left:0;text-align:justify;"><img alt="" height="146" src="https://i-blog.csdnimg.cn/blog_migrate/657c53b9579dd1642c4493240ee84696.png" width="487">top3</p> 
+         <p style="margin-left:0;text-align:justify;">(标准误差)</p> 
+         <p style="margin-left:0;text-align:justify;"><img alt="" height="128" src="https://i-blog.csdnimg.cn/blog_migrate/e6189fee356061a2201f31bc2322c464.png" width="426"></p> 
+         <p style="margin-left:0;text-align:justify;">开球不踢进去</p> 
+         <h3 style="margin-left:0px;text-align:justify;">5.2开球表现</h3> 
+         <p style="margin-left:0;text-align:justify;">为了隔离学习到的多智能体行为在踢球时得分的表现，我们禁用了这一特性，取而代之的是刚刚让机器人把踢球朝着对手的目标踢到一个位置，尽可能接近一个没有得分的球哨。表2显示了在2013年机器人足球世界杯比赛中与前三名球队的比赛结果，没有试图在起跳时得分。将表2的结果与表1的结果进行比较，我们发现在不尝试踢球时，成绩显著下降。这一结果并不令人惊讶，因为我们发现，在对阵阿波罗3D和FCPortugal的90 %左右的时间，以及在对阵2013版UT Austin Villa的60 %以上的时间。使用CILB和PCLL重叠分层学习的结合大大提高了团队的绩效。</p> 
+         <h3 style="margin-left:0px;text-align:justify;">5.3踢球</h3> 
+         <p style="margin-left:0;text-align:justify;">为了隔离通过重叠的分层学习方法所学习到的踢球性能，我们禁用了所有的踢球(除了在踢球时，我们再次让机器人尽可能地朝着对手的目标踢球而不得分)，并且使用了一种总是运球的行为。表3显示了2013年机器人足球世界杯比赛中仅运球时与前三名球队比赛的数据。</p> 
+         <p style="margin-left:0;text-align:justify;"></p> 
+         <p style="margin-left:0;text-align:justify;"><img alt="" height="129" src="https://i-blog.csdnimg.cn/blog_migrate/8692d493947ebaed4b8e1df68f8e656b.png" width="428"></p> 
+         <p style="margin-left:0;text-align:justify;">表3：全场比赛成绩，平均超过1000场。每一行对应2013年机器人足球世界杯排名前三的终点队之一。研究表明，2014年UT队的一个版本只使用运球策略与给定的对手队取得的平均进球差。括号中的值是标准误差。所有比赛的胜负和联系总数分别为2480、15和505场。</p> 
+         <p style="margin-left:0;text-align:justify;"><img alt="" height="166" src="https://i-blog.csdnimg.cn/blog_migrate/4117bd75c6513837bedfd0d6ab65fbb9.png" width="547"></p> 
+         <p style="margin-left:0;text-align:justify;">表4：全场比赛成绩，平均超过1000场。每一行对应2013年机器人足球世界杯排名前三的终点队之一。研究表明，2014年UT奥斯汀别墅队使用不同的异构机器人类型与给定的对手队相比，实现了平均目标差异。</p> 
+         <p style="margin-left:0;text-align:justify;">在这里，我们看到在比较表3和表2时，性能的另一个明显下降。踢球在表现上提供了很大的增益，与FCPortugal相比，平均进球差几乎翻了一番，而仅仅是运球。这一结果与UT奥斯汀·维拉在2011年RoboCup比赛中获胜形成鲜明对比，在这场比赛中，球队试图在不使用重叠分层学习方法的情况下融入踢球技术，发现踢球实际上降低了球队的表现。</p> 
+         <h3 style="margin-left:0px;text-align:justify;">5.4不同的机器人模型</h3> 
+         <p style="margin-left:0;text-align:justify;">在RoboCup比赛中给出了使用5种不同机器人类型的选项，要求一个团队至少必须使用3种不同类型的机器人，任何一种类型不得超过7种。可供选择的五类机器人如下：</p> 
+         <p style="margin-left:0;text-align:justify;">0型：标准Nao机器人</p> 
+         <p style="margin-left:0;text-align:justify;">1型：长腿和手臂的</p> 
+         <p style="margin-left:0;text-align:justify;">2型：快速移动的</p> 
+         <p style="margin-left:0;text-align:justify;">3型：宽臀和最长腿和手臂的</p> 
+         <p style="margin-left:0;text-align:justify;">4型：脚上有脚趾的</p> 
+         <p style="margin-left:0;text-align:justify;"></p> 
+         <p style="margin-left:0;text-align:justify;">我们将我们的重叠分层学习方法应用于每个可用的机器人类型的学习行为。表4提供了每个机器人类型在2013年机器人足球世界杯与前三名球队比赛的比赛数据。虽然不同机器人类型之间在性能上存在一定差异，很可能是由于它们的身体模型存在差异，但所有的机器人类型都能够在2013年机器人足球世界杯比赛中可靠击败顶级球队。这表明了我们提出的重叠分层学习方法的有效性和对不同机器人模型的泛化能力。在2014年的比赛中，UT奥斯汀别墅队使用了7种性能最好的4型机器人模型，2种性能最好的0型机器人模型，1种和3种机器人模型各1种，行走速度最快。</p> 
+         <p style="margin-left:0;text-align:justify;"></p> 
+         <p style="margin-left:0;text-align:justify;"></p> 
+         <p style="margin-left:0;text-align:justify;"></p> 
+        </div> 
+       </div> 
+      </article>   
+      <img src="https://img-home.csdnimg.cn/images/20211209110851.png" alt="pdf_watermark" width="0" height="0" style="display: none"> 
+      <div class="print_watermark"></div> 
+      <div class="print_watermark_info"> 
+       <p>内容来源：csdn.net</p> 
+       <p>作者昵称：IFI_rccsim</p> 
+       <p>原文链接：https://blog.csdn.net/m0_54190358/article/details/122611720</p> 
+       <p>作者主页：https://blog.csdn.net/m0_54190358</p> 
+      </div> 
+      <style>
+    .print_watermark, .print_watermark_info {
+      display: none
+    }
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact; /* Chrome, Safari */
+        color-adjust: exact; /* Firefox */
+        background-image: none !important;
+      }
+      * {
+        -webkit-print-color-adjust: exact;
+      }
+      .blog-content-box {
+        padding: 0;
+      }
+      .blog-content-box .article-header .article-info-box > div:not(.article-bar-top){
+        display: none !important;
+      }
+      .blog-content-box .article-header .article-info-box  .article-bar-top img{
+          display:none
+      }
+      .blog-content-box .article-header .article-info-box > .article-bar-top .bar-content > *:not(.follow-nickName):not(.time){
+          display: none !important;
+      }
+      .print_watermark {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        z-index: 999;
+        background-image: url('https://img-home.csdnimg.cn/images/20211209110851.png');
+        background-size: 180px auto;
+        background-repeat: repeat;
+      }
+      .print_watermark_info {
+        display: block;
+        position: fixed;
+        bottom: 16px;
+        right: 0;
+        z-index: 1000;
+        color: #e8e8ed;
+        font-size: 12px;
+        ocapity: .5
+      }
+      @page {
+        margin: 0 10mm 10mm;
+        size: landscape;
+      }
+      body, article {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #csdn-toolbar,.main_father > *:not(#mainBox), .csdn-side-toolbar, .main_father aside {
+        display: none !important;
+      }
+      .main_father > #mainBox {
+        width: unset
+      }
+      .main_father > #mainBox > main > *:not(.blog-content-box){
+        display: none !important;
+      }
+    }
+  </style> 
+     </div>       
+     <div id="pcCommentBox" class="comment-box comment-box-new2 login-comment-box-new" style="display:none"> 
+      <div class="has-comment" style="display:block"> 
+       <div class="one-line-box"> 
+        <div class="has-comment-tit go-side-comment"> 
+         <span class="count">0</span>&nbsp;条评论 
+        </div> 
+        <div class="has-comment-con comment-operate-item"></div> 
+        <a class="has-comment-bt-right go-side-comment focus">写评论</a> 
+       </div> 
+      </div> 
+     </div>     
+     <div class="blog-footer-bottom" style="margin-top:10px;"></div>   
+    </main> 
+    <aside class="blog_container_aside "> 
+     <div id="asideProfile" class="aside-box active"> 
+      <div class="profile-intro d-flex"> 
+       <div class="avatar-box d-flex justify-content-center flex-column"> 
+        <a href="https://blog.csdn.net/m0_54190358" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_379&quot;,&quot;spm&quot;:&quot;3001.4121&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358&quot;,&quot;ab&quot;:&quot;new&quot;}"> <img src="https://profile-avatar.csdnimg.cn/default.jpg!1" class="avatar_pic"> </a> 
+       </div> 
+       <div class="user-info d-flex flex-column profile-intro-name-box"> 
+        <div class="profile-intro-name-boxTop"> 
+         <a href="https://blog.csdn.net/m0_54190358" target="_blank" class="" id="uid" title="IFI_rccsim" data-report-click="{&quot;mod&quot;:&quot;popu_379&quot;,&quot;spm&quot;:&quot;3001.4122&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358&quot;,&quot;ab&quot;:&quot;new&quot;}"> <span class="name" username="m0_54190358">IFI_rccsim</span> </a> 
+        </div> 
+        <div class="profile-intro-name-boxFooter-new"> 
+         <p class="profile-intro-name-leve"> <span> 博客等级 </span> <img class="level" src="https://csdnimg.cn/identity/blog2.png"> </p> 
+         <span class="profile-intro-name-years" title="已加入 CSDN 5年">码龄5年</span> 
+        </div> 
+       </div> 
+      </div> 
+      <div class="profile-intro-rank-information"> 
+       <dl> 
+        <a href="https://blog.csdn.net/m0_54190358" data-report-click="{&quot;mod&quot;:&quot;1598321000_001&quot;,&quot;spm&quot;:&quot;3001.4310&quot;}" data-report-query="t=1"> 
+         <dd>
+          <span>23</span>
+         </dd> 
+         <dt>
+          原创
+         </dt> </a> 
+       </dl> 
+       <dl title="7"> 
+        <dd>
+         7
+        </dd> 
+        <dt>
+         点赞
+        </dt> 
+       </dl> 
+       <dl title="21"> 
+        <dd>
+         21
+        </dd> 
+        <dt>
+         收藏
+        </dt> 
+       </dl> 
+       <dl id="fanBox" title="7"> 
+        <dd>
+         <span id="fan">7</span>
+        </dd> 
+        <dt>
+         粉丝
+        </dt> 
+       </dl> 
+      </div> 
+      <div class="profile-intro-name-boxOpration"> 
+       <div class="opt-letter-watch-box"> 
+        <a class="personal-watch bt-button" id="btnAttent">已关注</a> 
+       </div> 
+       <div class="opt-letter-watch-box"> 
+        <a rel="noopener" class="bt-button personal-letter" href="https://im.csdn.net/chat/m0_54190358" target="_blank">私信</a> 
+       </div> 
+      </div> 
+     </div> 
+     <div class="swiper-slide-box-remuneration"> 
+      <a data-report-click="{&quot;spm&quot;:&quot;3001.9728&quot;,&quot;extra&quot;:{&quot;index&quot;:&quot;0&quot;}}" data-report-view="{&quot;spm&quot;:&quot;3001.9728&quot;,&quot;extra&quot;:{&quot;index&quot;:&quot;0&quot;}}" href="https://activity.csdn.net/writing?id=11023" target="_blank"> <img src="https://i-operation.csdnimg.cn/images/df0221ef6e464179a32490be26f73a09.jpeg" alt=""> </a> 
+     </div> 
+     <div id="his-selection" class="aside-box"> 
+      <h3 class="aside-title">TA的精选</h3> 
+      <div class="aside-content"> 
+       <ul class="his-selection-box"> 
+        <li class="his-selection-item"> <a class="title" target="_blank" href="https://blog.csdn.net/m0_54190358/article/details/123480636" data-report-click="{&quot;spm&quot;:&quot;3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358/article/details/123480636&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358/article/details/123480636&quot;,&quot;ab&quot;:&quot;new&quot;}"> <span class="tag">新</span> <span class="text">IND-fxl-第五周</span> </a> <p class="read-count"> 455 阅读 </p> </li> 
+        <li class="his-selection-item"> <a class="title" target="_blank" href="https://blog.csdn.net/m0_54190358/article/details/123315059" data-report-click="{&quot;spm&quot;:&quot;3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358/article/details/123315059&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358/article/details/123315059&quot;,&quot;ab&quot;:&quot;new&quot;}"> <span class="tag">新</span> <span class="text">IND-wks-第四周</span> </a> <p class="read-count"> 440 阅读 </p> </li> 
+        <li class="his-selection-item"> <a class="title" target="_blank" href="https://blog.csdn.net/m0_54190358/article/details/123310706" data-report-click="{&quot;spm&quot;:&quot;3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358/article/details/123310706&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358/article/details/123310706&quot;,&quot;ab&quot;:&quot;new&quot;}"> <span class="tag active">热</span> <span class="text">IND-fhl-第四周</span> </a> <p class="read-count"> 3905 阅读 </p> </li> 
+        <li class="his-selection-item"> <a class="title" target="_blank" href="https://blog.csdn.net/m0_54190358/article/details/122610661" data-report-click="{&quot;spm&quot;:&quot;3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358/article/details/122610661&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358/article/details/122610661&quot;,&quot;ab&quot;:&quot;new&quot;}"> <span class="tag active">热</span> <span class="text">UT2016学习笔记</span> </a> <p class="read-count"> 1013 阅读 </p> </li> 
+        <li class="his-selection-item"> <a class="title" target="_blank" href="https://blog.csdn.net/m0_54190358/article/details/122916196" data-report-click="{&quot;spm&quot;:&quot;3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358/article/details/122916196&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358/article/details/122916196&quot;,&quot;ab&quot;:&quot;new&quot;}"> <span class="tag active">热</span> <span class="text">IND-wks-第一周</span> </a> <p class="read-count"> 686 阅读 </p> </li> 
+       </ul> 
+       <p class="his-selection-move"> <a class="more" data-report-view="{&quot;spm&quot;:&quot;3001.10751&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358?type=blog&quot;}" data-report-click="{&quot;spm&quot;:&quot;3001.10751&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358?type=blog&quot;}" href="https://blog.csdn.net/m0_54190358?type=blog" target="_blank">查看更多 <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentArrowRightWhite.png" alt=""></a> </p> 
+      </div> 
+     </div> 
+     <div id="asideHotArticle" class="aside-box"> 
+      <h3 class="aside-title">大家在看</h3> 
+      <div class="aside-content"> 
+       <ul class="hotArticle-list"> 
+        <li> <a href="https://blog.csdn.net/sheji2096/article/details/155494436" target="_blank" data-report-click="{&quot;spm&quot;:&quot;3001.10093&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/sheji2096/article/details/155494436&quot;,&quot;strategy&quot;:&quot;202_1052723-3618664_RCMD&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.10093&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/sheji2096/article/details/155494436&quot;,&quot;strategy&quot;:&quot;202_1052723-3618664_RCMD&quot;,&quot;ab&quot;:&quot;new&quot;}"> 计算机毕设 java 博物馆藏品管理信息系统 SSM 框架藏品管理平台 Java 开发的博物馆藏品全流程管理系统 </a> </li> 
+        <li> <a href="https://blog.csdn.net/2502_91523773/article/details/155579217" target="_blank" data-report-click="{&quot;spm&quot;:&quot;3001.10093&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/2502_91523773/article/details/155579217&quot;,&quot;strategy&quot;:&quot;202_1052723-3618666_RCMD&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.10093&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/2502_91523773/article/details/155579217&quot;,&quot;strategy&quot;:&quot;202_1052723-3618666_RCMD&quot;,&quot;ab&quot;:&quot;new&quot;}"> MySQL数据库基础：从三层结构到常用操作 </a> </li> 
+        <li> <a href="https://blog.csdn.net/sheji2562/article/details/155488305" target="_blank" data-report-click="{&quot;spm&quot;:&quot;3001.10093&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/sheji2562/article/details/155488305&quot;,&quot;strategy&quot;:&quot;202_1052723-3618670_RCMD&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.10093&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/sheji2562/article/details/155488305&quot;,&quot;strategy&quot;:&quot;202_1052723-3618670_RCMD&quot;,&quot;ab&quot;:&quot;new&quot;}"> 计算机毕设 java “伊牛” 养牛场管理平台 SSM 框架养牛场运营平台 Java 开发的养殖管理与数据系统 </a> </li> 
+        <li> <a href="https://blog.csdn.net/sheji2096/article/details/155494399" target="_blank" data-report-click="{&quot;spm&quot;:&quot;3001.10093&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/sheji2096/article/details/155494399&quot;,&quot;strategy&quot;:&quot;202_1052723-3618665_RCMD&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.10093&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/sheji2096/article/details/155494399&quot;,&quot;strategy&quot;:&quot;202_1052723-3618665_RCMD&quot;,&quot;ab&quot;:&quot;new&quot;}"> 计算机毕设 java 博客网站 SSM 框架博客管理平台 Java 开发的博客全流程管理系统 </a> </li> 
+        <li> <a href="https://blog.csdn.net/2302_80755459/article/details/155579931" target="_blank" data-report-click="{&quot;spm&quot;:&quot;3001.10093&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/2302_80755459/article/details/155579931&quot;,&quot;strategy&quot;:&quot;202_1052723-3618658_RCMD&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.10093&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/2302_80755459/article/details/155579931&quot;,&quot;strategy&quot;:&quot;202_1052723-3618658_RCMD&quot;,&quot;ab&quot;:&quot;new&quot;}"> oracle从入门到精通--物理存储结构 </a> </li> 
+       </ul> 
+      </div> 
+     </div> 
+     <div id="asideArchiveNew" class="aside-box"> 
+      <h3 class="aside-title">TA的历史创作历程</h3> 
+      <div class="aside-content"> 
+       <div class="archive-box"> 
+        <div class="archive-list-item-container"> 
+         <div class="swiper-btn swiper-prev"> 
+          <svg class="icon-swiper-btn" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" fill="none"> 
+           <path d="M10.3535 2.35352L4.70703 8L10.3535 13.6465L9.64648 14.3535L3.29297 8L9.64648 1.64648L10.3535 2.35352Z" fill="currentColor" /> 
+          </svg> 
+         </div> 
+         <div class="swiper"> 
+          <div class="swiper-wrapper"> 
+           <div class="swiper-slide archive-list-item">
+            <a href="https://blog.csdn.net/m0_54190358?type=blog&amp;year=2022&amp;month=03" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_538&quot;,&quot;spm&quot;:&quot;3001.4138&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358?type=blog&amp;year=2022&amp;month=03&quot;}"><span class="year"> 2022年</span><span class="num"> 31篇</span></a>
+           </div> 
+          </div> 
+         </div> 
+         <div class="swiper-btn swiper-next"> 
+          <svg class="icon-swiper-btn" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16" fill="none"> 
+           <path d="M5.64649 2.35352L11.293 8L5.64648 13.6465L6.35352 14.3535L12.707 8L6.35352 1.64649L5.64649 2.35352Z" fill="currentColor" /> 
+          </svg> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+     <div id="asideCategory" class="aside-box aside-box-column "> 
+      <h3 class="aside-title">分类专栏</h3> 
+      <div class="aside-content" id="aside-content"> 
+       <ul> 
+        <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/m0_54190358/category_11594622.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358/category_11594622.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+          <div class="special-column-bar "></div> <img src="https://i-blog.csdnimg.cn/columns/default/20201014180756738.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class="title oneline"> robocup </span> </a> <span class="special-column-num">23篇</span> </li> 
+       </ul> 
+      </div> 
+     </div> 
+     <div class="article-previous" id="article-previous"> 
+      <dl data-report-click="{&quot;spm&quot;:&quot;3001.10752&quot;,&quot;extend1&quot;:&quot;上一篇&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.10752&quot;,&quot;extend1&quot;:&quot;上一篇&quot;}"> 
+       <dt>
+         上一篇： 
+       </dt> 
+       <dd> 
+        <a href="https://blog.csdn.net/m0_54190358/article/details/122611670" data-report-query="spm=3001.10752"> UT2014学习笔记 </a> 
+       </dd> 
+      </dl> 
+      <dl class="next" data-report-click="{&quot;spm&quot;:&quot;3001.10796&quot;,&quot;extend1&quot;:&quot;下一篇&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.10796&quot;,&quot;extend1&quot;:&quot;下一篇&quot;}"> 
+       <dt>
+         下一篇： 
+       </dt> 
+       <dd> 
+        <a href="https://blog.csdn.net/m0_54190358/article/details/122619594" data-report-query="spm=3001.10796"> UT2015学习笔记 </a> 
+       </dd> 
+      </dl> 
+     </div> 
+     <!-- 详情页显示目录 --> 
+     <!--文章目录--> 
+     <div id="asidedirectory" class="aside-box"> 
+      <div class="groupfile groupfile-active" id="directory"> 
+       <h3 class="aside-title">目录</h3> 
+       <div class="align-items-stretch group_item" id="align-items-stretch"> 
+        <div class="pos-box"> 
+         <div class="scroll-box"> 
+          <div class="toc-box"></div> 
+         </div> 
+        </div> 
+       </div> 
+       <p class="flexible-btn-new active" id="flexible-btn-groupfile" data-report-click="{&quot;spm&quot;:&quot;3001.10780&quot;,&quot;strategy&quot;:&quot;展开全部&quot;}" data-minheight="117px" data-maxheight="446px" data-fbox="#align-items-stretch"><span class="text">展开全部</span> <img class="look-more" src="https://csdnimg.cn/release/blogv2/dist/pc/img/arrowup-line-bot-White.png" alt=""></p> 
+       <p class="flexible-btn-new-close active" data-report-click="{&quot;spm&quot;:&quot;3001.10780&quot;,&quot;strategy&quot;:&quot;收起&quot;}" data-minheight="117px" data-maxheight="446px" data-fbox="#align-items-stretch"><span class="text">收起</span> <img class="look-more" src="https://csdnimg.cn/release/blogv2/dist/pc/img/arrowup-line-top-White.png" alt=""></p> 
+      </div> 
+     </div> 
+     <div class="gitcode-qc-left-box aside-box" data-report-click="{&quot;spm&quot;:&quot;3001.11256&quot;, &quot;extra&quot;:&quot;{\&quot;position\&quot;:\&quot;left\&quot;}&quot;}"></div> 
+    </aside>    
+   </div> 
+   <div class="recommend-right align-items-stretch clearfix" id="rightAside" data-type="recommend"> 
+    <aside class="recommend-right_aside"> 
+     <div class="rightside-fixed-hide"> 
+     </div> 
+     <div id="recommend-right"> 
+      <div class="flex-column aside-box groupfile groupfile-active " id="groupfile"> 
+       <div class="groupfile-div"> 
+        <h3 class="aside-title">目录</h3> 
+        <div class="align-items-stretch group_item" id="align-items-stretch-right"> 
+         <div class="pos-box"> 
+          <div class="scroll-box"> 
+           <div class="toc-box"></div> 
+          </div> 
+         </div> 
+        </div> 
+        <p class="flexible-btn-new" id="flexible-btn-groupfile" data-report-click="{&quot;spm&quot;:&quot;3001.10782&quot;,&quot;strategy&quot;:&quot;展开全部&quot;}" data-traigger="true" data-minheight="117px" data-maxheight="446px" data-fbox="#align-items-stretch-right"><span class="text">展开全部</span> <img class="look-more" src="https://csdnimg.cn/release/blogv2/dist/pc/img/arrowup-line-bot-White.png" alt=""></p> 
+        <p class="flexible-btn-new-close close" data-report-click="{&quot;spm&quot;:&quot;3001.10782&quot;,&quot;strategy&quot;:&quot;收起&quot;}" data-traigger="true" data-minheight="117px" data-maxheight="446px" data-fbox="#align-items-stretch-right"><span class="text">收起</span> <img class="look-more" src="https://csdnimg.cn/release/blogv2/dist/pc/img/arrowup-line-top-White.png" alt=""></p> 
+       </div> 
+      </div> 
+      <div class="gitcode-qc-right-box aside-box" data-report-click="{&quot;spm&quot;:&quot;3001.11256&quot;, &quot;extra&quot;:&quot;{\&quot;position\&quot;:\&quot;right\&quot;}&quot;}"></div> 
+      <div class="article-previous" id="article"> 
+       <dl data-report-click="{&quot;spm&quot;:&quot;3001.10752&quot;,&quot;extend1&quot;:&quot;上一篇&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.10752&quot;,&quot;extend1&quot;:&quot;上一篇&quot;}"> 
+        <dt>
+          上一篇： 
+        </dt> 
+        <dd> 
+         <a href="https://blog.csdn.net/m0_54190358/article/details/122611670" data-report-query="spm=3001.10752"> UT2014学习笔记 </a> 
+        </dd> 
+       </dl> 
+       <dl class="next" data-report-click="{&quot;spm&quot;:&quot;3001.10796&quot;,&quot;extend1&quot;:&quot;下一篇&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.10796&quot;,&quot;extend1&quot;:&quot;下一篇&quot;}"> 
+        <dt>
+          下一篇： 
+        </dt> 
+        <dd> 
+         <a href="https://blog.csdn.net/m0_54190358/article/details/122619594" data-report-query="spm=3001.10796"> UT2015学习笔记 </a> 
+        </dd> 
+       </dl> 
+      </div> 
+      <div class="aside-box kind_person d-flex flex-column flexible-box-new"> 
+       <h3 class="aside-title">分类专栏</h3> 
+       <div class="align-items-stretch kindof_item" id="kind_person_column"> 
+        <div class="aside-content" id="aside-content-column"> 
+         <ul> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/m0_54190358/category_11594622.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/m0_54190358/category_11594622.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://i-blog.csdnimg.cn/columns/default/20201014180756738.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> robocup </span> </a> <span class="special-column-num">23篇</span> </li> 
+         </ul> 
+        </div> 
+        <p class="text-center"> <a class="flexible-btn-new" data-report-click="{&quot;spm&quot;:&quot;3001.10783&quot;,&quot;strategy&quot;:&quot;展开全部&quot;}" data-traigger="true" data-maxheight="0" data-minheight="208px" data-fbox="#aside-content-column" data-flag="flag"><span class="text">展开全部</span> <img class="look-more" src="https://csdnimg.cn/release/blogv2/dist/pc/img/arrowup-line-bot-White.png" alt=""></a> <a class="flexible-btn-new-close" data-report-click="{&quot;spm&quot;:&quot;3001.10783&quot;,&quot;strategy&quot;:&quot;收起&quot;}" data-traigger="true" data-minheight="208px" data-fbox="#aside-content-column" data-scroll="true" data-flag="flag"><span class="text">收起</span> <img class="look-more" src="https://csdnimg.cn/release/blogv2/dist/pc/img/arrowup-line-top-White.png" alt=""></a> </p> 
+       </div> 
+      </div> 
+     </div> 
+    </aside> 
+   </div> 
+   <div class="recommend-right1  align-items-stretch clearfix" id="rightAsideConcision" data-type="recommend"> 
+    <aside class="recommend-right_aside"> 
+     <div id="recommend-right-concision"> 
+      <div class="flex-column aside-box groupfile" id="groupfileConcision"> 
+       <div class="groupfile-div1"> 
+        <h3 class="aside-title">目录</h3> 
+        <div class="align-items-stretch group_item"> 
+         <div class="pos-box"> 
+          <div class="scroll-box"> 
+           <div class="toc-box"></div> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+    </aside> 
+   </div> 
+  </div> 
+  <div class="mask-dark"></div> 
+  <div class="skin-boxshadow"></div> 
+  <div class="directory-boxshadow"></div> 
+  <div class="comment-side-box-shadow comment-side-tit-close" id="commentSideBoxshadow"> 
+   <div class="comment-side-content"> 
+    <div class="comment-side-tit"> 
+     <span class="comment-side-tit-count">评论</span> 
+     <img class="comment-side-tit-close" src="https://csdnimg.cn/release/blogv2/dist/pc/img/closeBt.png">
+    </div> 
+    <div id="pcCommentSideBox" class="comment-box comment-box-new2 }" style="display:'block'}"> 
+     <div class="comment-edit-box d-flex"> 
+      <div class="user-img"> 
+      </div> 
+      <form id="commentform"> 
+       <textarea class="comment-content" name="comment_content" id="comment_content" placeholder="欢迎高质量的评论，低质的评论会被折叠" maxlength="1000"></textarea> 
+       <div class="comment-reward-box" style="background-image: url('https://img-home.csdnimg.cn/images/20230131025301.png');"> 
+        <a class="btn-remove-reward"></a> 
+        <div class="form-reward-box"> 
+         <div class="info">
+           成就一亿技术人! 
+         </div> 
+         <div class="price-info">
+           拼手气红包
+          <span class="price">6.0元</span> 
+         </div> 
+        </div> 
+       </div> 
+       <div class="comment-operate-box"> 
+        <div class="comment-operate-l"> 
+         <span id="tip_comment" class="tip">还能输入<em>1000</em>个字符</span> 
+        </div> 
+        <div class="comment-operate-c">
+          &nbsp; 
+        </div> 
+        <div class="comment-operate-r"> 
+         <div class="comment-operate-item comment-reward"> 
+          <img class="comment-operate-img" data-url="https://csdnimg.cn/release/blogv2/dist/pc/img/" src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentReward.png" alt="红包"> 
+          <span class="comment-operate-tip">添加红包</span> 
+         </div> 
+         <div class="comment-operate-item comment-emoticon"> 
+          <img class="comment-operate-img" data-url="https://csdnimg.cn/release/blogv2/dist/pc/img/" src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentEmotionIcon.png" alt="表情包"> 
+          <span class="comment-operate-tip">插入表情</span> 
+          <div class="comment-emoticon-box comment-operate-isshow"> 
+           <div class="comment-emoticon-img-box"></div> 
+          </div> 
+         </div> 
+         <div class="comment-operate-item comment-code"> 
+          <img class="comment-operate-img" data-url="https://csdnimg.cn/release/blogv2/dist/pc/img/" src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentCodeIcon.png" alt="表情包"> 
+          <span class="comment-operate-tip">代码片</span> 
+          <div class="comment-code-box comment-operate-isshow"> 
+           <ul id="commentCode"> 
+            <li><a data-code="html">HTML/XML</a></li> 
+            <li><a data-code="objc">objective-c</a></li> 
+            <li><a data-code="ruby">Ruby</a></li> 
+            <li><a data-code="php">PHP</a></li> 
+            <li><a data-code="csharp">C</a></li> 
+            <li><a data-code="cpp">C++</a></li> 
+            <li><a data-code="javascript">JavaScript</a></li> 
+            <li><a data-code="python">Python</a></li> 
+            <li><a data-code="java">Java</a></li> 
+            <li><a data-code="css">CSS</a></li> 
+            <li><a data-code="sql">SQL</a></li> 
+            <li><a data-code="plain">其它</a></li> 
+           </ul> 
+          </div> 
+         </div> 
+         <div class="comment-operate-item"> 
+          <input type="hidden" id="comment_replyId" name="comment_replyId"> 
+          <input type="hidden" id="article_id" name="article_id" value="122611720"> 
+          <input type="hidden" id="comment_userId" name="comment_userId" value=""> 
+          <input type="hidden" id="commentId" name="commentId" value=""> 
+          <a data-report-click="{&quot;mod&quot;:&quot;1582594662_003&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4227&quot;,&quot;ab&quot;:&quot;new&quot;}"> <input type="submit" class="btn-comment btn-comment-input" value="评论"> </a> 
+         </div> 
+        </div> 
+       </div> 
+      </form> 
+     </div> 
+     <div class="comment-list-container"> 
+      <div class="comment-list-box comment-operate-item"> 
+      </div> 
+      <div id="lookFlodComment" class="look-flod-comment"> 
+       <span class="count"></span>&nbsp;条评论被折叠&nbsp;
+       <a class="look-more-flodcomment">查看</a> 
+      </div> 
+      <div class="opt-box text-center"> 
+       <div class="btn btn-sm btn-link-blue" id="btnMoreComment"></div> 
+      </div> 
+     </div> 
+    </div> 
+    <div id="pcFlodCommentSideBox" class="pc-flodcomment-sidebox"> 
+     <div class="comment-fold-tit">
+      <span id="lookUnFlodComment" class="back"><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentArrowLeftWhite.png" alt=""></span>被折叠的&nbsp;
+      <span class="count"></span>&nbsp;条评论 
+      <a href="https://blogdev.blog.csdn.net/article/details/122245662" class="tip" target="_blank">为什么被折叠?</a> 
+      <a href="https://bbs.csdn.net/forums/FreeZone" class="park" target="_blank"> <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/iconPark.png">到【灌水乐园】发言</a> 
+     </div> 
+     <div class="comment-fold-content"></div> 
+     <div id="lookBadComment" class="look-bad-comment side-look-comment"> 
+      <a class="look-more-comment">查看更多评论<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentArrowDownWhite.png" alt=""></a> 
+     </div> 
+    </div> 
+   </div> 
+   <div class="comment-rewarddialog-box"> 
+    <div class="form-box"> 
+     <div class="title-box">
+       添加红包 
+      <a class="btn-form-close"></a> 
+     </div> 
+     <form id="commentRewardForm"> 
+      <div class="ipt-box"> 
+       <label for="txtName">祝福语</label> 
+       <div class="ipt-btn-box"> 
+        <input type="text" name="name" id="txtName" autocomplete="off" maxlength="50"> 
+        <a class="btn-ipt btn-random"></a> 
+       </div> 
+       <p class="notice">请填写红包祝福语或标题</p> 
+      </div> 
+      <div class="ipt-box"> 
+       <label for="txtSendAmount">红包数量</label> 
+       <div class="ipt-txt-box"> 
+        <input type="text" name="sendAmount" maxlength="4" id="txtSendAmount" placeholder="请填写红包数量(最小10个)" autocomplete="off"> 
+        <span class="after-txt">个</span> 
+       </div> 
+       <p class="notice">红包个数最小为10个</p> 
+      </div> 
+      <div class="ipt-box"> 
+       <label for="txtMoney">红包总金额</label> 
+       <div class="ipt-txt-box error"> 
+        <input type="text" name="money" maxlength="5" id="txtMoney" placeholder="请填写总金额(最低5元)" autocomplete="off"> 
+        <span class="after-txt">元</span> 
+       </div> 
+       <p class="notice">红包金额最低5元</p> 
+      </div> 
+      <div class="balance-info-box"> 
+       <label>余额支付</label> 
+       <div class="balance-info">
+         当前余额
+        <span class="balance">3.43</span>元 
+        <a href="https://i.csdn.net/#/wallet/balance/recharge" class="link-charge" target="_blank">前往充值 &gt;</a> 
+       </div> 
+      </div> 
+      <div class="opt-box"> 
+       <div class="pay-info">
+         需支付：
+        <span class="price">10.00</span>元 
+       </div> 
+       <button type="button" class="ml-auto btn-cancel">取消</button> 
+       <button type="button" class="ml8 btn-submit" disabled="true">确定</button> 
+      </div> 
+     </form> 
+    </div> 
+   </div> 
+   <div class="rr-guide-box"> 
+    <div class="rr-first-box"> 
+     <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/guideRedReward02.png" alt=""> 
+     <button class="btn-guide-known next">下一步</button> 
+    </div> 
+    <div class="rr-second-box"> 
+     <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/guideRedReward03.png" alt=""> 
+     <button class="btn-guide-known known">知道了</button> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="redEnvolope" id="redEnvolope"> 
+   <div class="env-box"> 
+    <div class="env-container"> 
+     <div class="pre-open" id="preOpen"> 
+      <div class="top"> 
+       <header> 
+        <img class="clearTpaErr" :src="redpacketAuthor.avatar" alt=""> 
+        <div class="author">
+         成就一亿技术人!
+        </div> 
+       </header> 
+       <div class="bot-icon"></div> 
+      </div> 
+      <footer> 
+       <div class="red-openbtn open-start"></div> 
+       <div class="tip">
+         领取后你会自动成为博主和红包主的粉丝 
+        <a class="rule" target="_blank">规则</a> 
+       </div> 
+      </footer> 
+     </div> 
+     <div class="opened" id="opened"> 
+      <div class="bot-icon"> 
+       <header> 
+        <a class="creatorUrl" href="" target="_blank"> <img class="clearTpaErr" src="https://profile-avatar.csdnimg.cn/default.jpg!2" alt=""> </a> 
+        <div class="author"> 
+         <div class="tt">
+          hope_wisdom
+         </div> 发出的红包 
+        </div> 
+       </header> 
+      </div> 
+      <div class="receive-box"> 
+       <header></header> 
+       <div class="receive-list"> 
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+    <div class="close-btn"></div> 
+   </div> 
+  </div> 
+  <div class="pay-code"> 
+   <div class="pay-money">
+    实付
+    <span class="pay-money-span" data-nowprice="" data-oldprice="">元</span>
+   </div> 
+   <div class="content-blance">
+    <a class="blance-bt" href="javascript:;">使用余额支付</a>
+   </div> 
+   <div class="content-code"> 
+    <div id="payCode" data-id=""> 
+     <div class="renovate"> 
+      <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/pay-time-out.png"> 
+      <span>点击重新获取</span> 
+     </div> 
+    </div> 
+    <div class="pay-style">
+     <span><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/weixin.png"></span>
+     <span><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/zhifubao.png"></span>
+     <span><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/jingdong.png"></span>
+     <span class="text">扫码支付</span>
+    </div> 
+   </div> 
+   <div class="bt-close"> 
+    <svg t="1567152543821" class="icon" viewbox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10924" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12"> 
+     <defs> 
+      <style type="text/css"></style> 
+     </defs> 
+     <path d="M512 438.378667L806.506667 143.893333a52.032 52.032 0 1 1 73.6 73.621334L585.621333 512l294.485334 294.485333a52.074667 52.074667 0 0 1-73.6 73.642667L512 585.621333 217.514667 880.128a52.053333 52.053333 0 1 1-73.621334-73.642667L438.378667 512 143.893333 217.514667a52.053333 52.053333 0 1 1 73.621334-73.621334L512 438.378667z" fill="" p-id="10925"></path> 
+    </svg> 
+   </div> 
+   <div class="pay-balance"> 
+    <input type="radio" class="pay-code-radio" data-type="details"> 
+    <span class="span">钱包余额</span> 
+    <span class="balance" style="color:#FC5531;font-size:14px;">0</span> 
+    <div class="pay-code-tile"> 
+     <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/pay-help.png" alt=""> 
+     <div class="pay-code-content"> 
+      <div class="span"> 
+       <p class="title">抵扣说明：</p> 
+       <p> 1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br> 2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p> 
+      </div> 
+     </div> 
+    </div> 
+   </div> 
+   <a class="pay-balance-con" href="https://i.csdn.net/#/wallet/balance/recharge" target="_blank"><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/recharge.png" alt=""><span>余额充值</span></a> 
+  </div>  
+  <div class="keyword-dec-box" id="keywordDecBox"></div>  
+  <!-- 富文本柱状图  --> 
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/chart/chart.css">        
+  <link rel="stylesheet" href="https://g.csdnimg.cn/lib/cboxEditor/1.1.6/embed-editor.min.css"> 
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/codesnippet/lib/highlight/styles/atom-one-dark.css">                  
+ </body>
+</html>

@@ -1,0 +1,34 @@
+<Simulation>
+
+  <Compound name="robots">
+    <!-- B-Human Team (Team 5) - Goalkeeper Only -->
+    <!-- Robot 1: Goalkeeper (purple color) -->
+    <Body ref="Nao" name="robot1">
+      <Translation x="-4.2" y="0" z="320mm"/>
+      <Rotation z="0degree"/>
+      <Set name="TeamColor" value="purple"/>
+    </Body>
+
+    <!-- B-Team (Team 70) - Forward Only -->
+    <!-- Robot 22: Forward (red color) -->
+    <Body ref="Nao" name="robot22">
+      <Translation x="1" y="0" z="320mm"/>
+      <Rotation z="180degree"/>
+      <Set name="TeamColor" value="red"/>
+    </Body>
+  </Compound>
+
+  <Compound name="teams">
+    <Compound name="B-Human">
+      <Compound name="5"/>
+      <Compound name="black"/>
+      <Compound name="purple"/>
+    </Compound>
+    <Compound name="B-Team">
+      <Compound name="70"/>
+      <Compound name="red"/>
+      <Compound name="blue"/>
+    </Compound>
+  </Compound>
+
+</Simulation>

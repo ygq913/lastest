@@ -1,0 +1,30 @@
+Config/Locations/Default/jerseyClassifierProvider2020For2023.cfg
+深色衣服：容易识别为队友，调节satThreshold（饱和度）提高，调节hueSimilarityThreshold（色调相似度阈值）调高或调低
+浅色衣服：识别为对手，调低satThreshold或grayRange的min调低
+
+可通过remote中的data/upper/module/JerseyClass...2020For2023中调节
+并通过simrobot的命令台中输入: 
+vid all ?      
+vid all module:JerseyClassifierProvider2020For2023:jersey
+vid all module:JerseyClassifierProvider2020For2023:jerseyClassification
+进行查看相应信息，更具体的分支错误可通过
+module:JerseyClassifierProvider2020For2023:branch4Stage
+进行debug
+
+
+
+
+
+
+
+dr debugImages:module:RefereeGestureClassifier:patch
+
+dr drawing:module:RefereeGestureClassifier:patchRect
+inHeight = inWidth = (refereeHeight / refereeDistance) × focalLength
+                    = (2400mm / 距离mm) × 焦距像素
+
+
+1请求数据流
+dr debugImages:module:RefereeGestureClassifier:patch
+2获取视图
+vi module:RefereeGestureClassifier:patch

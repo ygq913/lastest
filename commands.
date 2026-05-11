@@ -1,0 +1,49 @@
+sudo su
+
+cd /home/kaiden/BHuman/BHumanCodeRelease/Build/Linux/DeployDialog/Develop
+./DeployDialog
+
+cd /home/kaiden/BHuman/BHumanCodeRelease/Build/Linux/bush/Develop
+./bush
+1 goalkeeper 可设置为5、6号
+1号不宜当goalkeeper
+
+8不宜当-r 3
+
+-r 1 goalkeeper
+-r 2 中场
+
+8号一般，不可当goalkeeper
+cd /home/kaiden/BHuman/BHumanCodeRelease/Make/Common
+./deploy -r 1 10.0.70.6 -nc -t 70 -s Default -m 70 -w SPL_A -v 100 -b &&
+./deploy -r 5 10.0.70.5 -nc -t 70 -s Default -m 70 -w SPL_A -v 100 -b &&
+./deploy -r 2 10.0.70.8 -nc -t 70 -s Default -m 70 -w SPL_A -v 100 -b &&
+./deploy -r 4 10.0.70.7 -nc -t 70 -s Default -m 70 -w SPL_A -v 100 -b &&
+./deploy -r 3 10.0.70.1 -nc -t 70 -s Default -m 70 -w SPL_A -v 100 -b 
+
+./deploy -r 1 10.0.70.6 -nc -t 70 -s Default -m 70 -w SPL_B -v 100 -b &&
+./deploy -r 5 10.0.70.5 -nc -t 70 -s Default -m 70 -w SPL_B -v 100 -b &&
+./deploy -r 2 10.0.70.8 -nc -t 70 -s Default -m 70 -w SPL_B -v 100 -b &&
+./deploy -r 4 10.0.70.7 -nc -t 70 -s Default -m 70 -w SPL_B -v 100 -b &&
+./deploy -r 3 10.0.70.1 -nc -t 70 -s Default -m 70 -w SPL_B -v 100 -b 
+
+SPL_A
+地址：10.0.5.110
+子网掩码：255.255.0.0
+网关：10.0.0.1
+
+{ name = "nao1"; headId = "P0000074A04S91K00001"; bodyId = "P0000073A06S91900051"; },
+  { name = "nao2"; headId = "P0000074A04S91900060"; bodyId = "P0000073A06S91900060"; },
+  { name = "nao6"; headId = "P0000074A04S91K00018"; bodyId = "P0000073A06S91K00003"; },  nao3
+  { name = "nao4"; headId = "P0000074A04S91K00007"; bodyId = "P0000073A06S91K00002"; },
+  { name = "nao5"; headId = "P0000074A04S91K00013"; bodyId = "P0000073A06S91K00007"; }
+  
+  { name = "nao3"; headId = "P0000074A04S8AJ00007"; bodyId = "P0000073A06S8AJ00002"; }
+
+
+   { name = "fly11"; headId = "P0000074A10S49K00002"; bodyId = "P0000073A20S49K00002"; },
+  { name = "fly12"; headId = "P0000074A09S36Q00025"; bodyId = "P0000073A19S36Q00028"; },
+  { name = "fly13"; headId = "P0000074A10S45K00005"; bodyId = "P0000073A20S45K00004"; },
+  { name = "fly14"; headId = "P0000074A10S45K00003"; bodyId = "P0000073A20S45K00002"; },
+  { name = "fly15"; headId = "P0000074A10S49400027"; bodyId = "P0000073A20S49400027"; },
+  

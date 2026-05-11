@@ -1,0 +1,155 @@
+#!/bin/bash
+# Generate Xcode project using CMake. The script requires that the CMake bundle is
+# installed in a location where macOS can find it (e.g. /Applications). It runs both
+# on Intel and ARM Macs.
+
+cd "$(dirname "$(which "$0")")"
+
+CMAKE=./cmake
+PROJECTDIR=../../Build/macOS
+PROJECTPATH=SimRobot.xcodeproj
+PROJECTSRC=$PROJECTDIR/SimRobot.xcodeproj
+PLIST="/usr/libexec/PlistBuddy -c"
+TEMPPATH=/tmp/generate.tmp
+TEMPPATH2=/tmp/generate2.tmp
+
+# Create a symbolic link to cmake.
+if [ ! -e "$CMAKE" ]; then
+  echo -n "Searching for CMake... "
+  if [ -e "$(which cmake)" ]; then
+    ln -sf "$(which cmake)" "$CMAKE"
+  else
+    while read file; do
+      if [ -f "$file/Contents/bin/cmake" ]; then
+        ln -sf "$file/Contents/bin/cmake" "$CMAKE"
+      fi
+    done <<<"$(/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump \
+    | grep "^[ 	]*path:" \
+    | grep "CMake" \
+    | sed -e "s%[ 	]*path: *%%" -e "s% (.*%%")"
+  fi
+
+  # Could the link be created?
+  if [ -e "$CMAKE" ]; then
+    echo "Found."
+  else
+    echo "Not found."
+    exit 1
+  fi
+fi
+
+# Determine current version of macOS SDK.
+SDKVERSION="$(grep "MinimalDisplayName" "$(xcrun --show-sdk-path)/SDKSettings.json" \
+| sed 's%^.*"MinimalDisplayName":"\([^"]*\).*$%\1%')"
+
+if [ -d "$PROJECTPATH" ]; then
+  # Delete project if macOS SDK version changed.
+  if [ -f "$PROJECTPATH/sdkversion" ]; then
+    OLDVERSION="$(cat "$PROJECTPATH/sdkversion")"
+  else
+    OLDVERSION=
+  fi
+  if [ "$OLDVERSION" != "$SDKVERSION" ]; then
+    rm -fr "$PROJECTPATH" "$PROJECTDIR"
+  fi
+fi
+
+# Move CMakeFiles to Build directory, where CMake expects them.
+# Previous cache files are saved if they exist.
+if [ -d "$PROJECTPATH/CMakeFiles" ]; then
+  mkdir -p "$PROJECTDIR"
+  if [ -e "$PROJECTDIR/CMakeFiles" ]; then
+    if [ -e "$PROJECTDIR/CMakeFiles-temp" ]; then
+      rm -r "$PROJECTDIR/CMakeFiles-temp"
+    fi
+    mv "$PROJECTDIR/CMakeFiles" "$PROJECTDIR/CMakeFiles-temp"
+  fi
+  mv "$PROJECTPATH/CMakeFiles" "$PROJECTDIR"
+fi
+
+# Create project.
+"$CMAKE" -G Xcode -S ../CMake -B $PROJECTDIR
+./pbxgen pbxgen.cfg $PROJECTSRC/project.pbxproj
+xattr -w com.apple.xcode.CreatedByBuildSystem true "$PROJECTDIR"
+
+# Backwards compatibility: Remove the link to project if it exists.
+if [ -L "$PROJECTPATH" ]; then
+  rm "$PROJECTPATH"
+fi
+
+# Ensure that project directory exists.
+mkdir -p $PROJECTPATH
+
+# Move generated/updated CMakeFiles directory back here.
+mv "$PROJECTDIR/CMakeFiles" "$PROJECTPATH"
+
+# Restore cache files if they exist.
+if [ -e "$PROJECTDIR/CMakeFiles-temp" ]; then
+  mv "$PROJECTDIR/CMakeFiles-temp" "$PROJECTDIR/CMakeFiles"
+fi
+
+# Remember macOS SDK version
+echo -n "$SDKVERSION" >"$PROJECTPATH/sdkversion"
+
+touch $PROJECTPATH/project.pbxproj
+if cmp -s $PROJECTPATH/project.pbxproj $PROJECTSRC/project.pbxproj; then
+  echo "Xcode project is already up to date"
+else
+  echo "Updating Xcode project"
+
+  # Copy the project file
+  mv $PROJECTSRC/project.pbxproj $PROJECTPATH/project.pbxproj
+
+  # Prepare creating schemes.
+  SCHEMEDIR=$PROJECTPATH/xcshareddata/xcschemes
+  SCHEMESRC=$PROJECTSRC/xcshareddata/xcschemes
+  SEDOPTION="$(cat $PROJECTSRC/project.pbxproj.sed)"
+  mkdir -p $SCHEMEDIR
+
+  # Create the three schemes from the ones CMake created. Patch in the target for
+  # profiling. Disable GPU validation to suppress some output.
+  # Deactivate some building targets.
+  SCHEMETEMPLATE=$SCHEMESRC/SimRobot.xcscheme
+  sed <$SCHEMETEMPLATE >$TEMPPATH2 \
+  -e 's%"container:[^"]*/Build/macOS/SimRobot%"container:../../Make/macOS/SimRobot%' \
+  -e 's%debugDocumentVersioning *= *"YES"/>%debugDocumentVersioning = "YES">\
+   </ProfileAction>%'
+  (
+    sed <$TEMPPATH2 -n '/<\/ProfileAction>/q;p'
+    sed <$TEMPPATH2 -n '/BuildableProductRunnable/,/\/BuildableProductRunnable/p;/\/BuildableProductRunnable/q'
+    sed <$TEMPPATH2 -n '/<\/ProfileAction>/,$p'
+  ) \
+  | sed >$TEMPPATH \
+    -e "$SEDOPTION" \
+    -e 's%launchStyle *= *"0"%launchStyle = "0" enableGPUValidationMode = "1"%' \
+    -e 's%buildConfiguration *= *".*"%buildConfiguration = "Debug"%'
+  mv $TEMPPATH "$SCHEMEDIR/Debug.xcscheme"
+  sed <"$SCHEMEDIR/Debug.xcscheme" >$TEMPPATH 's%buildConfiguration *= *"Debug"%buildConfiguration = "Develop"%'
+  mv $TEMPPATH "$SCHEMEDIR/Develop.xcscheme"
+  sed <"$SCHEMEDIR/Debug.xcscheme" >$TEMPPATH 's%buildConfiguration *= *"Debug"%buildConfiguration = "Release"%'
+  mv $TEMPPATH "$SCHEMEDIR/Release.xcscheme"
+
+  # Avoid automatically creating schemes for all targets.
+  SETTINGSDIR=$PROJECTPATH/project.xcworkspace/xcshareddata
+  SETTINGSPATH=$SETTINGSDIR/WorkspaceSettings.xcsettings
+  mkdir -p $SETTINGSDIR
+  mv $PROJECTSRC/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings $SETTINGSPATH
+  $PLIST "Set :IDEWorkspaceSharedSettings_AutocreateContextsIfNeeded false" $SETTINGSPATH
+
+  # Force Xcode to use Build directory.
+  SETTINGSDIR=$PROJECTPATH/project.xcworkspace/xcuserdata/$USER.xcuserdatad
+  SETTINGSPATH=$SETTINGSDIR/WorkspaceSettings.xcsettings
+  mkdir -p "$SETTINGSDIR"
+  $PLIST "Set :BuildLocationStyle UseTargetSettings" $SETTINGSPATH >/dev/null 2>>/dev/null || $PLIST "Add :BuildLocationStyle string UseTargetSettings" $SETTINGSPATH  >/dev/null
+  $PLIST "Set :DerivedDataLocationStyle Default" $SETTINGSPATH 2>/dev/null || $PLIST "Add :DerivedDataLocationStyle string Default" $SETTINGSPATH
+fi
+
+# Disable App Nap for SimRobot.
+defaults write org.B-Human.SimRobot NSAppSleepDisabled -bool YES
+
+# Disable a default view menu entry because it doesn't work well with recreating the menu.
+defaults write org.B-Human.SimRobot NSFullScreenMenuItemEverywhere -bool NO
+
+# Cleanup.
+rm -r $PROJECTSRC
+rm -f $TEMPPATH $TEMPPATH2

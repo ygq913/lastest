@@ -1,0 +1,13 @@
+# Additional setup for 1 vs 1 (Goalkeeper vs Forward)
+# B-Human Team: robot1 (Goalkeeper)
+# B-Team: robot22 (Forward)
+
+robot robot1
+jc press 11 call Includes/PenaltyKickFirst # Shift+Ctrl+K (penalty kicK)
+jc press 12 call Includes/PushingFreeKickFirst # Shift+Ctrl+L (fouL)
+
+robot robot22
+jc press 11 call Includes/PenaltyKickSecond # Shift+Ctrl+K (penalty kicK)
+jc press 12 call Includes/PushingFreeKickSecond # Shift+Ctrl+L (fouL)
+
+robot all
